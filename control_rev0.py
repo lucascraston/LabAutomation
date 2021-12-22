@@ -3,7 +3,7 @@ import sys
 
 
 USB = "USB0::0xF4EC::0xEE38::SDSMMFCX5R3326::INSTR"
-LAN = "TCPIP0::192.168.137.164::inst0::INSTR"
+LAN = "TCPIP0::192.168.137.99::inst0::INSTR" # this changes with each reconnect
 
 rm = pyvisa.ResourceManager()
 adress = rm.list_resources()
