@@ -1,9 +1,11 @@
 import pyvisa
 import sys
-
+import numpy as np
+import matplotlib.pyplot as plt
+import uuid
 
 USB = "USB0::0xF4EC::0xEE38::SDSMMFCX5R3326::INSTR"
-LAN = "TCPIP0::192.168.137.99::inst0::INSTR" # this changes with each reconnect
+LAN = "TCPIP0::192.168.137.203::inst0::INSTR" # this changes with each reconnect
 
 rm = pyvisa.ResourceManager()
 adress = rm.list_resources()
@@ -26,7 +28,21 @@ def trigger_level(channel,level):
     scope.write("{}:TRLV {}V".format(channel,level))
     
 def channel_offset(channel,offset):
-    scope.write("{}:OFST {}".format(channel,offset))
+    scope.write("{}:OFST {}".format(channel,offset))\
+    
+def screen_dump():
+        scope.chunk_size = 20*1024*1024
+        scope.timeout =30000
+        file_name = "C:\Lucas's School\Siglent scope\SCDP_{}.bmp".format(uuid.uuid4())
+        scope.write("SCDP")
+        result_str = scope.read_raw()
+        f = open(file_name,'wb')
+        f.write(result_str)
+        f.flush()
+        f.close()
+        
+        
+#def waveform_plotter():
         
 
 
@@ -83,6 +99,8 @@ def get_command():
         if execute == quit:
             quit()   
         
+        
+screen_dump()        
 get_command()        
         
        
