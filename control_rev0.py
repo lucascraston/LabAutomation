@@ -4,8 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import uuid
 
+import pylab as pl
+
 USB = "USB0::0xF4EC::0xEE38::SDSMMFCX5R3326::INSTR"
-LAN = "TCPIP0::192.168.137.203::inst0::INSTR" # this changes with each reconnect
+LAN = "TCPIP0::192.168.137.43::inst0::INSTR" # this changes with each reconnect
 
 rm = pyvisa.ResourceManager()
 adress = rm.list_resources()
@@ -28,7 +30,7 @@ def trigger_level(channel,level):
     scope.write("{}:TRLV {}V".format(channel,level))
     
 def channel_offset(channel,offset):
-    scope.write("{}:OFST {}".format(channel,offset))\
+    scope.write("{}:OFST {}".format(channel,offset))
     
 def screen_dump():
         scope.chunk_size = 20*1024*1024
@@ -42,7 +44,45 @@ def screen_dump():
         f.close()
         
         
-#def waveform_plotter():
+def waveform_plotter(chanel):
+    scope.write("chdr off")
+    vdiv = scope.query("{}:vdiv?".format(chanel))
+    offset = scope.query("{}:ofst?".format(chanel))
+    tdiv = scope.query("tdiv?")
+    sample_rate = scope.query("sara?")
+    sara_unit = {'Giga':1E9,'Mega':1E6,'kilo':1E3}
+    for unit in sara_unit.keys():
+        if sample_rate.find(unit)!=-1:
+            sample_rate = sample_rate.split(unit)
+            sample_rate = float(sample_rate[0])*sara_unit[unit]
+            break
+    sample_rate = float(sample_rate)
+    scope.timeout = 30000
+    scope.chunk_size = 20*1028*1028
+    scope.write("{}:wf? dat2".format(chanel))
+    received= list(scope.read_raw())[15:]
+    received.pop()
+    received.pop()
+    volt_value = []
+    for data in received:
+        if data > 128:
+            data = data - 256
+        else:
+            pass
+        volt_value.append(data)
+    time_value = []
+    
+    for idx in range(0,len(volt_value)):
+        volt_value[idx] = volt_value[idx]/25*float(vdiv)-float(offset)
+        time_data = -(float(tdiv)*14/2)+idx*(1/sample_rate)
+        time_value.append(time_data)
+    pl.figure(figsize=(10,7))
+    pl.plot(time_value,volt_value,markersize=1,label=u"Voltage")
+    pl.legend()
+    pl.grid()
+    pl.show()
+
+    
         
 
 
@@ -100,8 +140,9 @@ def get_command():
             quit()   
         
         
-screen_dump()        
-get_command()        
+#screen_dump()        
+#get_command()  
+waveform_plotter(C3)      
         
        
     
