@@ -3,11 +3,11 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import uuid
-
 import pylab as pl
+import webbrowser 
 
 USB = "USB0::0xF4EC::0xEE38::SDSMMFCX5R3326::INSTR"
-LAN = "TCPIP0::192.168.137.43::inst0::INSTR" # this changes with each reconnect
+LAN = "TCPIP0::192.168.137.207::inst0::INSTR" # this changes with each reconnect
 
 rm = pyvisa.ResourceManager()
 adress = rm.list_resources()
@@ -15,36 +15,64 @@ adress = rm.list_resources()
 scope = rm.open_resource(LAN)
 print(scope.query("*IDN?"))
 
+C1 = 'C1'
+C2 = 'C2'
+C3 = 'C3'
+C4 = 'C4'
 
-
-def volt_division(channel,voltdiv):
+def volt_division(channel,voltdiv)->None:
+    '''
+    This sets the volt/division in volts on the specified channel
+    '''
     scope.write("{}:VDIV {}V".format(channel,voltdiv))
     
-def time_division(tdiv):
-        scope.write("TDIV {}S".format(tdiv))
+def time_division(tdiv)->None:
+    '''
+    This will set the time/div in seconds for the entire scope
+    '''
+    scope.write("TDIV {}S".format(tdiv))
         
-def trigger_mode(mode):    
+def trigger_mode(mode)->None: 
+    '''
+    This will set the specified trigger mode
+    Options include:
+
+    '''   
     scope.write("TRMD {}".format(mode))
     
-def trigger_level(channel,level):
+def trigger_level(channel,level)->None:
+    '''
+    This sets the trigger to a specific channel and level
+    '''
     scope.write("{}:TRLV {}V".format(channel,level))
     
-def channel_offset(channel,offset):
+def channel_offset(channel,offset)->None:
+    '''
+    This sets the offset for this channel
+    '''
     scope.write("{}:OFST {}".format(channel,offset))
     
 def screen_dump():
-        scope.chunk_size = 20*1024*1024
-        scope.timeout =30000
-        file_name = "C:\Lucas's School\Siglent scope\SCDP_{}.bmp".format(uuid.uuid4())
-        scope.write("SCDP")
-        result_str = scope.read_raw()
-        f = open(file_name,'wb')
-        f.write(result_str)
-        f.flush()
-        f.close()
+    '''
+    This takes a screen shot of the scope and
+    saves it as a .bmp
+    '''
+    scope.chunk_size = 20*1024*1024
+    scope.timeout =30000
+    file_name = "C:\Lucas's School\Siglent scope\SCDP_{}.bmp".format(uuid.uuid4())
+    scope.write("SCDP")
+    result_str = scope.read_raw()
+    f = open(file_name,'wb')
+    f.write(result_str)
+    f.flush()
+    f.close()
         
         
 def waveform_plotter(chanel):
+    '''
+    This will plot the current waveform in pylab
+    -I aim to update it to use matplotlib
+    '''
     scope.write("chdr off")
     vdiv = scope.query("{}:vdiv?".format(chanel))
     offset = scope.query("{}:ofst?".format(chanel))
@@ -82,24 +110,18 @@ def waveform_plotter(chanel):
     pl.grid()
     pl.show()
 
-    
-        
+    def web_browser()->None:
+        '''
+        This will open a web browser with the scopes IP
+        This webpage has a GUI and you can send SCPI commands
+        '''
+        webbrowser.open("LAN")
 
 
-C1 = 'C1'
-C2 = 'C2'
-C3 = 'C3'
-C4 = 'C4'
-
-  
-#function_list = ['M','V','T','TM','TL','Q']
 
 dict_function = {'V':volt_division,'T':time_division,'Q':quit,'TM':trigger_mode,'TL':trigger_level,'CO':channel_offset}
 
 measure_parameter = ['PKPK','MAX','MIN','AMPL','TOP','BASE','CMEAN','MEAN', 'STDEV','VSTD', 'RMS','CRMS','OVSN','FPRE','OVSP','RPRE', 'LEVELX','DELAY','TIMEL', 'PER', 'FREQ', 'PWID','NWID', 'RISE','FALL','WID','DUTY','NDUTY','ALL']
-
-
-
 
 
 def get_command():
@@ -140,9 +162,9 @@ def get_command():
             quit()   
         
         
-#screen_dump()        
-#get_command()  
-waveform_plotter(C3)      
+screen_dump()        
+#get_command() 
+#waveform_plotter(C3)      
         
        
     
