@@ -7,8 +7,7 @@ import pylab as pl
 import webbrowser 
 
 USB = "USB0::0xF4EC::0xEE38::SDSMMFCX5R3326::INSTR"
-LAN = "TCPIP0::192.168.137.207::inst0::INSTR" # this changes with each reconnect
-
+LAN = "TCPIP0::192.168.137.170::inst0::INSTR" # this changes with each reconnect
 rm = pyvisa.ResourceManager()
 adress = rm.list_resources()
 
@@ -110,12 +109,15 @@ def waveform_plotter(chanel):
     pl.grid()
     pl.show()
 
-    def web_browser()->None:
-        '''
-        This will open a web browser with the scopes IP
-        This webpage has a GUI and you can send SCPI commands
-        '''
-        webbrowser.open("LAN")
+def web_browser()->None:
+    '''
+    This will open a web browser with the scopes IP
+    This webpage has a GUI and you can send SCPI commands
+    '''
+    IP = str(scope.query("COMM_NET?").strip()).replace(",",".").replace("CONET ","")
+    webbrowser.register('chrome',None,
+	webbrowser.BackgroundBrowser("C://Program Files (x86)//Google//Chrome//Application//chrome.exe"))
+    webbrowser.get('chrome').open("http://{}/welcome.php".format(IP))
 
 
 
@@ -162,9 +164,11 @@ def get_command():
             quit()   
         
         
-screen_dump()        
+#screen_dump()        
 #get_command() 
-#waveform_plotter(C3)      
+#waveform_plotter(C3) 
+
+web_browser()     
         
        
     
