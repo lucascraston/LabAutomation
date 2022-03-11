@@ -8,11 +8,12 @@ layout =[
     #pg.Button("C3",tooltip="Channel 3",size=(10,3),button_color="White",mouseover_colors="Blue"),
     #pg.Button("C4",tooltip="Channel 4",size=(10,3),button_color="White",mouseover_colors="Lime Green")],
     
-    [pg.Text("Input Voltage Division(V):"),pg.InputText(key="VDIV")],
-    [pg.Text("Input Time Division(S):"),pg.InputText(key="TDIV")],
+    [pg.Text("Input Voltage Values(V):"),pg.InputText(key="VDIV")],
+    [pg.Text("Input Time Values(S):"),pg.InputText(key="TDIV")],
     [pg.Text("Select your channel:"),pg.Combo(["C1","C2","C3","C4"]),pg.Text("Select the trigger mode:"),pg.Combo(["NORM","AUTO","SINGLE"])],
     [pg.Button("Voltage Division"),
     pg.Button("Time Division"),pg.Button("Web Page"),pg.Button("Screen Dump"),pg.Button("Trigger Mode")],
+    [pg.Button("Trigger Level"),pg.Button("Voltage Offset")],
     [pg.Button("Quit")]
     ]
 window = pg.Window("Siglent Scope",layout)
@@ -40,7 +41,15 @@ while True:
     if event =="Voltage Division":
         scp.volt_division(values[0],values["VDIV"])  
     if event == "Time Division":
-        scp.time_division(values["TDIV"])    
+        scp.time_division(values["TDIV"])   
+
+    if event == "Trigger Level":
+        scp.trigger_level(values[0],values["VDIV"])
+
+    if event == "Voltage Offset":
+        scp.channel_offset(values[0],values["VDIV"])
+      
+
 
 
 window.close()    
