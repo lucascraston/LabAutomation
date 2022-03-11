@@ -1,6 +1,19 @@
+
 import PySimpleGUI as pg
 import control_rev0 as scp
+from PIL import Image
+import io
+import time
+
 pg.theme("Darkteal9")
+
+def update_image():
+    time.sleep(0.75)
+    file_name = scp.screen_dump()
+    image = Image.open(file_name)
+    bio= io.BytesIO()
+    image.save(bio,format = "PNG")
+    window["Image"].update(data=bio.getvalue())
 
 layout =[
     #[pg.Menu("menu 1")],
@@ -10,44 +23,51 @@ layout =[
     
     [pg.Text("Input Voltage Values(V):"),pg.InputText(key="VDIV")],
     [pg.Text("Input Time Values(S):"),pg.InputText(key="TDIV")],
-    [pg.Text("Select your channel:"),pg.Combo(["C1","C2","C3","C4"]),pg.Text("Select the trigger mode:"),pg.Combo(["NORM","AUTO","SINGLE"])],
+    [pg.Text("Select your channel:"),pg.Combo(["C1","C2","C3","C4"]),pg.Text("Select the trigger mode:"),pg.Combo(["AUTO","NORM","SINGLE","STOP"])],
     [pg.Button("Voltage Division"),
     pg.Button("Time Division"),pg.Button("Web Page"),pg.Button("Screen Dump"),pg.Button("Trigger Mode")],
-    [pg.Button("Trigger Level"),pg.Button("Voltage Offset")],
-    [pg.Button("Quit")]
-    ]
+    [pg.Button("Trigger Level"),pg.Button("Voltage Offset"),pg.Button("Refresh Image")],
+    [pg.Button("Quit")],
+    [pg.Image(key = "Image")]
+    ] 
+
+   
 window = pg.Window("Siglent Scope",layout)
-
-def channel_one_event(message):
-    print(message)
-
-
 
 while True:
     event,values = window.read()
-    print(event,values)
+    
     
     if event =="Quit" or event == pg.WIN_CLOSED:
         break
+
     if event =="Web Page":
         scp.web_browser()
+
     if event == "Screen Dump":
         scp.screen_dump() 
-    if event == "C1":
-        channel_one_event("C1 pressed")
+
     if event == "Trigger Mode":
         scp.trigger_mode(values[1])
+        update_image()
 
     if event =="Voltage Division":
-        scp.volt_division(values[0],values["VDIV"])  
+        scp.volt_division(values[0],values["VDIV"]) 
+        update_image() 
+
     if event == "Time Division":
-        scp.time_division(values["TDIV"])   
+        scp.time_division(values["TDIV"])  
+        update_image() 
 
     if event == "Trigger Level":
         scp.trigger_level(values[0],values["VDIV"])
+        update_image()
 
     if event == "Voltage Offset":
         scp.channel_offset(values[0],values["VDIV"])
+        update_image()
+    if event == "Refresh Image":
+        update_image()    
       
 
 
