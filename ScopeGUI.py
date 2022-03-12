@@ -9,7 +9,9 @@ pg.theme("Darkteal9")
 
 def update_image():
     time.sleep(0.75)
+    
     file_name = scp.screen_dump()
+ 
     image = Image.open(file_name)
     bio= io.BytesIO()
     image.save(bio,format = "PNG")
@@ -20,9 +22,11 @@ layout =[
     #pg.Button("C2",tooltip="Channel 2",size=(10,3),button_color="White",mouseover_colors="Red"),
     #pg.Button("C3",tooltip="Channel 3",size=(10,3),button_color="White",mouseover_colors="Blue"),
     #pg.Button("C4",tooltip="Channel 4",size=(10,3),button_color="White",mouseover_colors="Lime Green")],
+    [pg.Text("SCPI Terminal:"),pg.InputText(key="SCPI Command",size = (20,1)),pg.Button("Go"),pg.Button("Clear")],
+    [pg.Output(size = (75,5),key = "Output")],
+    [pg.Text("Input Voltage Values(V):"),pg.InputText(key="VDIV",size=(15,1)),pg.Text("Input Time Values(S):"),pg.InputText(key="TDIV",size=(15,1))],
     
-    [pg.Text("Input Voltage Values(V):"),pg.InputText(key="VDIV")],
-    [pg.Text("Input Time Values(S):"),pg.InputText(key="TDIV")],
+    #[pg.Text("Image Folder:"),pg.In(size=(20,1),enable_events=True,key="Folder"),pg.FolderBrowse()],
     [pg.Text("Select your channel:"),pg.Combo(["C1","C2","C3","C4"]),pg.Text("Select the trigger mode:"),pg.Combo(["AUTO","NORM","SINGLE","STOP"])],
     [pg.Button("Voltage Division"),
     pg.Button("Time Division"),pg.Button("Web Page"),pg.Button("Screen Dump"),pg.Button("Trigger Mode")],
@@ -34,10 +38,14 @@ layout =[
    
 window = pg.Window("Siglent Scope",layout)
 
+
+
 while True:
     event,values = window.read()
     
-    
+    print(values)
+    if event == "Go":
+        scp.command()
     if event =="Quit" or event == pg.WIN_CLOSED:
         break
 
@@ -71,5 +79,5 @@ while True:
       
 
 
-
+scp.end_session()
 window.close()    
