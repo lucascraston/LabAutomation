@@ -6,8 +6,9 @@ import uuid
 import pylab as pl
 import webbrowser 
 
+
 USB = "USB0::0xF4EC::0xEE38::SDSMMFCX5R3326::INSTR"
-LAN = "TCPIP0::192.168.137.170::inst0::INSTR" # this changes with each reconnect
+LAN = "TCPIP0::192.168.137.28::inst0::INSTR" # this changes with each reconnect
 rm = pyvisa.ResourceManager()
 adress = rm.list_resources()
 
@@ -58,13 +59,14 @@ def screen_dump():
     '''
     scope.chunk_size = 20*1024*1024
     scope.timeout =30000
-    file_name = "C:\Lucas's School\Siglent scope\SCDP_{}.bmp".format(uuid.uuid4())
+    file_name = "C:\Lucas's School\Siglent scope\Image_Folder\SCDP_{}.bmp".format(uuid.uuid4())
     scope.write("SCDP")
     result_str = scope.read_raw()
     f = open(file_name,'wb')
     f.write(result_str)
     f.flush()
     f.close()
+    return file_name
         
         
 def waveform_plotter(chanel):
@@ -166,9 +168,10 @@ def get_command():
         
 #screen_dump()        
 #get_command() 
-#waveform_plotter(C3) 
+#waveform_plotter(C1) 
 
-web_browser()     
+#web_browser()   
+#volt_division(C1,0.5)  
         
        
     
