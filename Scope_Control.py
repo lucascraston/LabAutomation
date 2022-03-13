@@ -6,18 +6,17 @@ import uuid
 import pylab as pl
 import webbrowser 
 import PySimpleGUI as pg
-#import control_rev0 as scp
 from PIL import Image
 import io
 import time
 
 
 USB = "USB0::0xF4EC::0xEE38::SDSMMFCX5R3326::INSTR"
-LAN = "TCPIP0::192.168.137.92::inst0::INSTR" # this changes with each reconnect
+LAN = "TCPIP0::192.168.137.123::inst0::INSTR" # this changes with each reconnect
 rm = pyvisa.ResourceManager()
 adress = rm.list_resources()
 
-pg.theme("Darkteal9")
+pg.theme("Darkteal2")
 
 scope = rm.open_resource(LAN)
 print(scope.query("*IDN?"))
@@ -59,7 +58,7 @@ def channel_offset(channel,offset)->None:
     '''
     scope.write("{}:OFST {}".format(channel,offset))
     
-def screen_dump():
+def screen_dump()->str:
     '''
     This takes a screen shot of the scope and
     saves it as a .bmp
@@ -76,7 +75,7 @@ def screen_dump():
     return file_name
         
         
-def waveform_plotter(chanel):
+def waveform_plotter(chanel)->None:
     '''
     This will plot the current waveform in pylab
     -I aim to update it to use matplotlib
@@ -136,35 +135,75 @@ def command():
 
 dict_function = {'V':volt_division,'T':time_division,'Q':quit,'TM':trigger_mode,'TL':trigger_level,'CO':channel_offset}
 
-measure_parameter = ['PKPK','MAX','MIN','AMPL','TOP','BASE','CMEAN','MEAN', 'STDEV','VSTD', 'RMS','CRMS','OVSN','FPRE','OVSP','RPRE', 'LEVELX','DELAY','TIMEL', 'PER', 'FREQ', 'PWID','NWID', 'RISE','FALL','WID','DUTY','NDUTY','ALL']
+measure_parameter = [
+    ["PKPK","","",""],
+    ['MAX',"","",""],
+    ['MIN',"","",""],
+    ['AMPL',"","",""],
+    ['TOP',"","",""],
+    ['BASE',"","",""],
+    ['CMEAN',"","",""],
+    ['MEAN',"","",""],
+    ['STDEV',"","",""],
+    ['VSTD',"","",""],
+    ['RMS',"","",""],
+    ['CRMS',"","",""],
+    ['OVSN',"","",""],
+    ['FPRE',"","",""],
+    ['OVSP',"","",""],
+    ['RPRE',"","",""],
+    ['LEVELX',"","",""],
+    ['DELAY',"","",""],
+    ['TIMEL',"","",""],
+    ['PER',"","",""],
+    ['FREQ',"","",""],
+    ['PWID',"","",""],
+    ['NWID',"","",""],
+    ['RISE',"","",""],
+    ['FALL',"","",""],
+    ['WID',"","",""],
+    ['DUTY',"","",""],
+    ['NDUTY',"","",""],
+    ['ALL',"","",""]
+    ]
 
-
+headings=["Measure","C1","C2","C3","C4"]
 
 
 
 def update_image():
     time.sleep(0.75)
-    
     file_name = screen_dump()
- 
     image = Image.open(file_name)
     bio= io.BytesIO()
     image.save(bio,format = "PNG")
     window["Image"].update(data=bio.getvalue())
 
-layout =[
-    
+
+measurement_table_column=[
+    [pg.Checkbox("C1",key="checkC1"),pg.Checkbox("C2",key="checkC2"),pg.Checkbox("C3",key="checkC3"),pg.Checkbox("C4",key="checkC4")],
+    [pg.Table(values=measure_parameter,num_rows= len(measure_parameter),headings=headings,auto_size_columns=True)]
+]    
+
+function_column = [
+
     [pg.Text("SCPI Terminal:"),pg.InputText(key="SCPI Command",size = (20,1)),pg.Button("Go"),pg.Button("Clear")],
     #[pg.Output(size = (75,5),key = "Output")],
     [pg.Text("Input Voltage Values(V):"),pg.InputText(key="VDIV",size=(15,1)),pg.Text("Input Time Values(S):"),pg.InputText(key="TDIV",size=(15,1))],
     
     #[pg.Text("Image Folder:"),pg.In(size=(20,1),enable_events=True,key="Folder"),pg.FolderBrowse()],
     [pg.Text("Select your channel:"),pg.Combo(["C1","C2","C3","C4"]),pg.Text("Select the trigger mode:"),pg.Combo(["AUTO","NORM","SINGLE","STOP"])],
-    [pg.Button("Voltage Division"),
-    pg.Button("Time Division"),pg.Button("Web Page"),pg.Button("Screen Dump"),pg.Button("Trigger Mode")],
-    [pg.Button("Trigger Level"),pg.Button("Voltage Offset"),pg.Button("Refresh Image")],
+    [pg.Button("Voltage Division",tooltip = "Channel,Volt/Div"),
+    pg.Button("Time Division",tooltip = "Time/Div"),pg.Button("Web Page"),pg.Button("Screen Dump"),pg.Button("Trigger Mode")],
+    [pg.Button("Trigger Level",tooltip ="Channel,Voltage level"),pg.Button("Voltage Offset",tooltip = "Channel,V Offset"),pg.Button("Refresh Image")],
     [pg.Button("Quit")],
-    [pg.Image(key = "Image")]
+    
+]
+layout =[
+    
+    
+    [pg.Column(function_column)],
+    [pg.Image(key = "Image"),pg.Column(measurement_table_column)]
     ] 
 
    
@@ -216,7 +255,6 @@ while True:
     if event == "Refresh Image":
         update_image()    
       
-#file_name = values["Folder"]
 
 end_session()
 window.close() 
