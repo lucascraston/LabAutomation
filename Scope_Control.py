@@ -12,7 +12,7 @@ import time
 
 
 USB = "USB0::0xF4EC::0xEE38::SDSMMFCX5R3326::INSTR"
-LAN = "TCPIP0::192.168.137.123::inst0::INSTR" # this changes with each reconnect
+LAN = "TCPIP0::192.168.137.219::inst0::INSTR" # this changes with each reconnect
 rm = pyvisa.ResourceManager()
 adress = rm.list_resources()
 
@@ -133,13 +133,30 @@ def end_session():
 def command():
     scope.write(values["SCPI Command"])
 
-dict_function = {'V':volt_division,'T':time_division,'Q':quit,'TM':trigger_mode,'TL':trigger_level,'CO':channel_offset}
+
+def measure_all(channel):
+    data = (scope.query("{}:PAVA? ALL".format(channel))).replace("{}:PAVA ".format(channel),"")
+    
+    data =  data.split(",")
+    
+    measure_data = {data[i]:data[i+1] for i in range(0,len(data),2)}
+    data_array=[]
+    for key in measure_data:
+        
+        data_info=[key,measure_data[key]]
+        data_array.append(data_info)
+    return data_array
+    
+    
+    
+
+
 
 measure_parameter = [
-    ["PKPK","","",""],
-    ['MAX',"","",""],
-    ['MIN',"","",""],
-    ['AMPL',"","",""],
+    ["PKPK","1","",""],
+    ['MAX',"2","",""],
+    ['MIN',"3","",""],
+    ['AMPL',"4","",""],
     ['TOP',"","",""],
     ['BASE',"","",""],
     ['CMEAN',"","",""],
@@ -167,7 +184,7 @@ measure_parameter = [
     ['ALL',"","",""]
     ]
 
-headings=["Measure","C1","C2","C3","C4"]
+headings=["Measure","Source"]
 
 
 
@@ -182,7 +199,7 @@ def update_image():
 
 measurement_table_column=[
     [pg.Checkbox("C1",key="checkC1"),pg.Checkbox("C2",key="checkC2"),pg.Checkbox("C3",key="checkC3"),pg.Checkbox("C4",key="checkC4")],
-    [pg.Table(values=measure_parameter,num_rows= len(measure_parameter),headings=headings,auto_size_columns=True)]
+    [pg.Table(values=measure_all(C1),num_rows= len(measure_parameter),headings=headings,auto_size_columns=True,key="Table")]
 ]    
 
 function_column = [
@@ -253,7 +270,13 @@ while True:
         channel_offset(values[0],values["VDIV"])
         update_image()
     if event == "Refresh Image":
-        update_image()    
+        update_image()
+
+    
+        
+
+
+
       
 
 end_session()
