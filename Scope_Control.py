@@ -11,15 +11,15 @@ import io
 import time
 
 
-USB = "USB0::0xF4EC::0xEE38::SDSMMFCX5R3326::INSTR"
+USB = "USB0::0xF4EC::0xEE38::SDSMMFCX5R3326::INSTR" # USB Pyvisa resource number
 LAN = "TCPIP0::192.168.137.219::inst0::INSTR" # this changes with each reconnect
 rm = pyvisa.ResourceManager()
 adress = rm.list_resources()
 
 pg.theme("Darkteal2")
 
-scope = rm.open_resource(LAN)
-print(scope.query("*IDN?"))
+scope = rm.open_resource(LAN) #connect to the scope
+print(scope.query("*IDN?")) #print the device ID
 
 C1 = 'C1'
 C2 = 'C2'
@@ -127,14 +127,22 @@ def web_browser()->None:
 	webbrowser.BackgroundBrowser("C://Program Files (x86)//Google//Chrome//Application//chrome.exe"))
     webbrowser.get('chrome').open("http://{}/welcome.php".format(IP))
 
-def end_session():
+def end_session()->None:
+
     scope.close()
 
 def command():
+    '''
+    Generic SCPI write command for our terminal
+    '''
     scope.write(values["SCPI Command"])
 
 
 def measure_all(channel):
+    '''
+    reads all measurements for the channel
+    and returns it as a list of lists 
+    '''
     data = (scope.query("{}:PAVA? ALL".format(channel))).replace("{}:PAVA ".format(channel),"")
     
     data =  data.split(",")
@@ -189,19 +197,25 @@ headings=["Measure","Source"]
 
 
 def update_image():
-    time.sleep(0.75)
+    '''
+    Updates our window immage by calling our Screen dump
+    function and converting it to PNG 
+    We call this after every event so we need to 
+    sleep so we ensure the scopes display is updated
+    '''
+    time.sleep(0.75) 
     file_name = screen_dump()
     image = Image.open(file_name)
     bio= io.BytesIO()
     image.save(bio,format = "PNG")
     window["Image"].update(data=bio.getvalue())
 
-
+#table for the measurements
 measurement_table_column=[
     [pg.Checkbox("C1",key="checkC1"),pg.Checkbox("C2",key="checkC2"),pg.Checkbox("C3",key="checkC3"),pg.Checkbox("C4",key="checkC4")],
     [pg.Table(values=measure_all(C1),num_rows= len(measure_parameter),headings=headings,auto_size_columns=True,key="Table")]
 ]    
-
+#column for the generic scope functions
 function_column = [
 
     [pg.Text("SCPI Terminal:"),pg.InputText(key="SCPI Command",size = (20,1)),pg.Button("Go"),pg.Button("Clear")],
@@ -216,6 +230,7 @@ function_column = [
     [pg.Button("Quit")],
     
 ]
+#our layout for the entire window
 layout =[
     
     
@@ -227,7 +242,7 @@ layout =[
 window = pg.Window("Siglent Scope",layout)
 
 
-
+#this constantly checks for events 
 while True:
     event,values = window.read()
     
