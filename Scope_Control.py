@@ -12,13 +12,13 @@ import time
 
 
 USB = "USB0::0xF4EC::0xEE38::SDSMMFCX5R3326::INSTR" # USB Pyvisa resource number
-LAN = "TCPIP0::192.168.137.219::inst0::INSTR" # this changes with each reconnect
+LAN = "TCPIP0::192.168.137.94::inst0::INSTR" # this changes with each reconnect
 rm = pyvisa.ResourceManager()
 adress = rm.list_resources()
 
 pg.theme("Darkteal2")
 
-scope = rm.open_resource(LAN) #connect to the scope
+scope = rm.open_resource(USB) #connect to the scope
 print(scope.query("*IDN?")) #print the device ID
 
 C1 = 'C1'
@@ -154,11 +154,10 @@ def measure_all(channel):
         data_info=[key,measure_data[key]]
         data_array.append(data_info)
     return data_array
-    
-    
-    
 
 
+    
+    
 
 measure_parameter = [
     ["PKPK","1","",""],
@@ -298,53 +297,7 @@ end_session()
 window.close() 
 
 
-'''
-def get_command():
-    command = input("\n V)Voltage division T)Time division TM)Trigger Mode TL)Trigger Level CO)Channel Offset Q)uit \n: ")
 
-    while command != 'Q' or command != 'q':
-
-        if command in dict_function.keys():
-            execute = dict_function.get(command)
-         
-        if execute == volt_division:
-            chan_in,voltInput = input("Please choose your channel and Division: ").split(',')
-            volt_division(chan_in,voltInput)
-            command = input("\n V)Voltage division T)Time division TM)Trigger Mode TL)Trigger Level CO)Channel Offset Q)uit \n: ")
-            
-            
-        if execute == time_division:
-            timeInput = input("Please choose your time Division: ")
-            time_division(timeInput)
-            command = input("\n V)Voltage division T)Time division TM)Trigger Mode TL)Trigger Level CO)Channel Offset Q)uit \n: ")    
-            
-        if execute == trigger_mode:
-            mode = input("choose your trigger mode; NORM, AUTO, SINGLE: ")
-            trigger_mode(mode)
-            command = input("\n V)Voltage division T)Time division TM)Trigger Mode TL)Trigger Level CO)Channel Offset Q)uit \n: ")
-            
-        if execute == trigger_level:
-            chan_in,level = input("choose your channel and trigger level: ").split(',')
-            trigger_level(chan_in,level)
-            command = input("\n V)Voltage division T)Time division TM)Trigger Mode TL)Trigger Level CO)Channel Offset Q)uit \n: ")
-            
-        if execute == channel_offset:
-            chan_in,offset = input("choose your channel and channel offset: ").split(',')
-            channel_offset(chan_in,offset)
-            command = input("\n V)Voltage division T)Time division TM)Trigger Mode TL)Trigger Level CO)Channel Offset Q)uit \n: ")    
-        
-        if execute == quit:
-            quit()   
-        
-        
-#screen_dump()        
-#get_command() 
-#waveform_plotter(C1) 
-
-#web_browser()   
-#volt_division(C1,0.5)  
-'''        
-       
     
     
     
