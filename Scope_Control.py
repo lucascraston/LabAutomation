@@ -12,13 +12,13 @@ import time
 
 
 USB = "USB0::0xF4EC::0xEE38::SDSMMFCX5R3326::INSTR" # USB Pyvisa resource number
-LAN = "TCPIP0::192.168.137.94::inst0::INSTR" # this changes with each reconnect
+LAN = "TCPIP0::10.42.0.133::inst0::INSTR" # this changes with each reconnect
 rm = pyvisa.ResourceManager()
 adress = rm.list_resources()
 
 pg.theme("Darkteal2")
 
-scope = rm.open_resource(USB) #connect to the scope
+scope = rm.open_resource(LAN) #connect to the scope
 print(scope.query("*IDN?")) #print the device ID
 
 C1 = 'C1'
