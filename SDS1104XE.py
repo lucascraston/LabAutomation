@@ -1,6 +1,7 @@
 
 import pyvisa
 import uuid
+import webbrowser 
 
 class sds1104xe:
 
@@ -47,7 +48,7 @@ class sds1104xe:
         '''
         self.scope.chunk_size = 20*1024*1024
         self.scope.timeout =30000
-        file_name = "C:\Lucas's School\Siglent scope\Image_Folder\SCDP_{}.bmp".format(uuid.uuid4())
+        file_name = "/home/lucasc/lucasc/Siglent scope/Image_Folder/SCDP_{}.bmp".format(uuid.uuid4())
         self.scope.write("SCDP")
         result_str = self.scope.read_raw()
         f = open(file_name,'wb')
@@ -55,11 +56,44 @@ class sds1104xe:
         f.flush()
         f.close()
         return file_name
+        
+    '''
+    def web_browser(self)->None:
+        
+        #This will open a web browser with the scopes IP
+        #This webpage has a GUI and you can send SCPI commands
+        
+        IP = str(self.scope.query("COMM_NET?").strip()).replace(",",".").replace("CONET ","")
+        webbrowser.register('chrome',None,
+	    webbrowser.BackgroundBrowser("C://Program Files (x86)//Google//Chrome//Application//chrome.exe"))
+        webbrowser.get('chrome').open("http://{}/welcome.php".format(IP))
+    '''
+   
+    def measure_all(self,channel):
+        '''
+        reads all measurements for the channel
+        and returns it as a list of lists 
+        '''
+        data = (self.scope.query("{}:PAVA? ALL".format(channel))).replace("{}:PAVA ".format(channel),"")
 
+        data =  data.split(",")
+
+        measure_data = {data[i]:data[i+1] for i in range(0,len(data),2)}
+        data_array=[]
+        for key in measure_data:
+
+            data_info=[key,measure_data[key]]
+            data_array.append(data_info)
+        return data_array     
+
+    def end_session(self)->None:
+
+        scope.scope.close()
     
 
 
 
 scope = sds1104xe("TCPIP0::10.42.0.133::inst0::INSTR")
 print("connection initiaded")
-scope.volt_division("C1",0.5)
+scope.screen_dump()
+#print(scope.measure_all("C1"))
